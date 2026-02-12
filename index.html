@@ -5,41 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Art Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = window.__app_id || 'pixel-art-gen';
-
-        window.db = db;
-        window.auth = auth;
-        window.appId = appId;
-        window.collection = collection;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.getDocs = getDocs;
-        window.deleteDoc = deleteDoc;
-
-        signInAnonymously(auth).catch((error) => console.error("Auth failed:", error));
-
-        onAuthStateChanged(auth, (user) => {
-            const userDisplay = document.getElementById('userDisplay');
-            const saveCloudBtn = document.getElementById('saveCloudBtn');
-            const openProjectsBtn = document.getElementById('openProjectsBtn');
-            if (user) {
-                const shortId = user.uid.slice(-6).toUpperCase();
-                userDisplay.textContent = `PLAYER #${shortId}`;
-                saveCloudBtn.classList.remove('hidden');
-                openProjectsBtn.classList.remove('hidden');
-                window.currentUser = user;
-            }
-        });
-    </script>
     <style>
         body {
             background-color: #0f172a;
@@ -120,7 +85,8 @@
         .panel {
             background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .modal-bg { background-color: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px); }
+        
+        .title-text { padding-right: 0.5rem; }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen flex flex-col">
@@ -128,38 +94,21 @@
         <span id="notificationText">Notification</span>
     </div>
 
-    <!-- Projects Modal -->
-    <div id="projectsModal" class="fixed inset-0 z-[120] hidden modal-bg flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl p-6 relative flex flex-col max-h-[85vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black text-white uppercase italic tracking-tighter">My Cloud Projects</h2>
-                <button id="closeProjects" class="text-slate-500 hover:text-white p-2">✕</button>
-            </div>
-            <div id="projectsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2">
-                <div class="text-center text-slate-500 col-span-full py-10 italic">Loading projects...</div>
-            </div>
-        </div>
-    </div>
-
     <div class="max-w-7xl mx-auto w-full flex-grow">
         <header class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-center md:text-left">
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm">Pixel Art Generator</h1>
-                <p class="text-slate-400 text-xs font-semibold tracking-wide">Professional Skap Level Converter • v2.5.2</p>
+                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm title-text">Pixel Art Generator</h1>
+                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.7.0</p>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-slate-800/80 border border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span id="userDisplay" class="text-xs font-bold text-slate-200 tracking-wider">CONNECTING...</span>
-                </div>
-                <button id="openProjectsBtn" class="hidden bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold px-4 py-2 rounded-lg transition-all uppercase flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
-                    My Projects
-                </button>
+            <div class="flex items-center gap-2">
+                <span class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm">
+                    Made by Swazee
+                </span>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar -->
             <div class="lg:col-span-1 flex flex-col panel rounded-2xl shadow-xl max-h-[85vh] overflow-hidden">
                 <div class="flex-1 overflow-y-auto p-5 space-y-6">
                     <div class="space-y-2">
@@ -260,12 +209,9 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <button id="downloadBtn" disabled class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl transition-all disabled:opacity-50 shadow-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 group">
+                        <button id="downloadBtn" disabled class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl transition-all disabled:opacity-50 shadow-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 group">
                             <span>JSON</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        </button>
-                        <button id="saveCloudBtn" class="hidden bg-slate-800 hover:bg-indigo-600 text-white p-4 rounded-xl transition-all shadow-lg border border-slate-700/50 flex items-center justify-center" title="Save to Cloud">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                         </button>
                     </div>
                 </div>
@@ -374,11 +320,6 @@
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
         const zoomLevelDisplay = document.getElementById('zoomLevelDisplay');
-        const saveCloudBtn = document.getElementById('saveCloudBtn');
-        const openProjectsBtn = document.getElementById('openProjectsBtn');
-        const projectsModal = document.getElementById('projectsModal');
-        const closeProjects = document.getElementById('closeProjects');
-        const projectsList = document.getElementById('projectsList');
 
         let originalImage = null, croppedImage = null, currentFilter = 'none', updateTimer = null, isCropMode = false, isDragging = false, startX, startY, endX, endY, isOptimizing = false, currentZoom = 1.0, finalLevelData = null;
 
@@ -437,7 +378,7 @@
             if(isCropMode) syncOverlay();
         }
 
-        const bannedTerms = ["badword", "offensive"]; // Replace with real list
+        const bannedTerms = ["badword", "offensive"];
         const containsProfanity = (text) => text && bannedTerms.some(w => text.toLowerCase().includes(w));
 
         function generateData() {
@@ -452,7 +393,6 @@
             const objs = [], artCol = collideCheckbox.checked, outCol = outlineCollide.checked;
             for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const cell = fullGrid[y][x]; if(!cell || cell.used) continue; let w=1; while(x+w<canvasW) { const n=fullGrid[y][x+w]; if(!n || n.used || n.r!==cell.r || n.g!==cell.g || n.b!==cell.b || n.isOutline!==cell.isOutline) break; w++; } let h=1; while(y+h<canvasH) { let ok=true; for(let dx=0;dx<w;dx++) { const n=fullGrid[y+h][x+dx]; if(!n || n.used || n.r!==cell.r || n.g!==cell.g || n.b!==cell.b || n.isOutline!==cell.isOutline) { ok=false; break; } } if(!ok) break; h++; } for(let dy=0;dy<h;dy++) for(let dx=0;dx<w;dx++) fullGrid[y+dy][x+dx].used=true; objs.push({ type:"block", position:[x*gridSize, y*gridSize], size:[w*gridSize, h*gridSize], color:[cell.r, cell.g, cell.b], collide:cell.isOutline?outCol:artCol }); } }
             
-            // NEW OPTIMIZATION LOGIC START
             if (objs.length > limit) {
                 const MAX_GRID = 100, MAX_BLEND = 80;
                 if (gridSize < MAX_GRID || blend < MAX_BLEND) {
@@ -472,11 +412,15 @@
                 if (isOptimizing) { isOptimizing=false; showNotif("Optimization Complete", 'success'); } 
                 downloadBtn.disabled=false; blockCountSpan.className="text-xl font-black text-indigo-400 leading-none"; 
             }
-            // NEW OPTIMIZATION LOGIC END
 
             blockCountSpan.innerText = objs.length; worldDimTextSpan.innerText = `${canvasW*gridSize}x${canvasH*gridSize}`;
             let sx=canvasW*gridSize/2, sy=canvasH*gridSize/2; if(spawnModeInput.value==='bottom') sy=(canvasH-(doOutline?border:0))*gridSize - gridSize*1.5;
-            finalLevelData = { settings: { name: levelNameInput.value || "Art", creator: (limit===2000?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, maps:[{ name:"Main", size:[canvasW*gridSize, canvasH*gridSize], backgroundColor:[15,23,42,1], objects:objs }] };
+            
+            // Revert back to respecting the "Community" dropdown check or user input
+            // If community upload (2000 blocks), force "Swazee" unless cloud save logic handles it separately. 
+            // In the "no cloud" version, we stick to the local file logic.
+            const isCommunity = limit === 2000;
+            finalLevelData = { settings: { name: levelNameInput.value || "Art", creator: (isCommunity?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, maps:[{ name:"Main", size:[canvasW*gridSize, canvasH*gridSize], backgroundColor:[15,23,42,1], objects:objs }] };
             const str = JSON.stringify(finalLevelData, null, 2); jsonPreview.innerText = str.length>1000?str.slice(0,1000)+'...':str;
         }
 
@@ -488,44 +432,6 @@
         window.addEventListener('mousemove', e => { if(!isDragging || !isCropMode) return; const r = cropOverlay.getBoundingClientRect(), sx = cropOverlay.width/r.width, sy = cropOverlay.height/r.height; endX = (e.clientX-r.left)*sx; endY = (e.clientY-r.top)*sy; const ctx = cropOverlay.getContext('2d'); ctx.clearRect(0,0,cropOverlay.width,cropOverlay.height); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,cropOverlay.width,cropOverlay.height); ctx.clearRect(startX, startY, endX-startX, endY-startY); ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2; ctx.strokeRect(startX, startY, endX-startX, endY-startY); });
         window.addEventListener('mouseup', () => { if(!isDragging || !isCropMode) return; isDragging = false; const gridSize = parseInt(pixelSizeInput.value), border = enableOutline.checked?parseInt(borderThickness.value):0; const cx = (Math.min(startX, endX)-border)*gridSize, cy = (Math.min(startY, endY)-border)*gridSize; const cw = Math.abs(endX-startX)*gridSize, ch = Math.abs(endY-startY)*gridSize; if (cw<=0 || ch<=0) return; const tc = document.createElement('canvas'); tc.width=cw; tc.height=ch; tc.getContext('2d').drawImage(croppedImage||originalImage, cx, cy, cw, ch, 0, 0, cw, ch); const n = new Image(); n.onload = () => { croppedImage=n; resetCropBtn.disabled=false; cropToggleBtn.click(); triggerUpdate(); }; n.src = tc.toDataURL(); });
         window.autoFix = (type) => { if (type === 'grid') { pixelSizeInput.value = parseInt(pixelSizeInput.value)+10; pixelSizeVal.innerText = pixelSizeInput.value+'px'; } else { colorThresholdInput.value = Math.min(80, parseInt(colorThresholdInput.value)+15); colorThresholdVal.innerText = getBlendingLabel(colorThresholdInput.value); } triggerUpdate(); };
-
-        saveCloudBtn.addEventListener('click', async () => {
-            if(!window.currentUser || !finalLevelData) return;
-            const rawLevel = levelNameInput.value.trim(), rawCreator = creatorInput.value.trim();
-            if (containsProfanity(rawLevel) || containsProfanity(rawCreator)) { showNotif("Inappropriate name detected.", "error"); return; }
-            const finalLevelName = rawLevel || "Art", finalCreatorName = rawCreator || "Anonymous";
-            
-            const cloudData = JSON.parse(JSON.stringify(finalLevelData));
-            cloudData.settings.name = finalLevelName; cloudData.settings.creator = finalCreatorName;
-
-            const projectData = {
-                name: finalLevelName, creator: finalCreatorName, limit: getLimit(),
-                gridSize: parseInt(pixelSizeInput.value), blending: parseInt(colorThresholdInput.value),
-                spawnMode: spawnModeInput.value, timestamp: Date.now(), blocks: blockCountSpan.innerText,
-                jsonData: cloudData, thumb: previewCanvas.toDataURL('image/png', 0.1)
-            };
-            try { await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', window.currentUser.uid, 'projects', Date.now().toString()), projectData); showNotif("Project Saved to Cloud!", "success"); } 
-            catch(e) { console.error(e); showNotif("Save Failed", "error"); }
-        });
-
-        openProjectsBtn.addEventListener('click', async () => {
-            projectsModal.classList.remove('hidden'); projectsList.innerHTML = '<div class="text-center col-span-full text-slate-500 py-10">Loading...</div>';
-            try {
-                const querySnapshot = await window.getDocs(window.collection(window.db, 'artifacts', window.appId, 'users', window.currentUser.uid, 'projects'));
-                projectsList.innerHTML = ''; const projs = [];
-                querySnapshot.forEach((doc) => projs.push({id:doc.id, ...doc.data()}));
-                projs.sort((a,b) => b.timestamp - a.timestamp);
-                if(projs.length === 0) projectsList.innerHTML = '<div class="text-center col-span-full text-slate-500 py-10">No saved projects found.</div>';
-                projs.forEach(p => {
-                    const card = document.createElement('div'); card.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 hover:border-indigo-500 transition-all group relative";
-                    card.innerHTML = `<div class="h-32 bg-slate-900 rounded-lg mb-3 flex items-center justify-center overflow-hidden">${p.thumb ? `<img src="${p.thumb}" class="h-full w-full object-contain pixelated" style="image-rendering: pixelated;">` : '<span class="text-slate-600">No Preview</span>'}</div><h3 class="font-bold text-white text-sm mb-1 truncate">${p.name}</h3><p class="text-[10px] text-slate-400 mb-3">${new Date(p.timestamp).toLocaleDateString()} • ${p.blocks} Blocks</p><div class="flex gap-2"><button class="load-btn flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold py-2 rounded uppercase">Load</button><button class="del-btn bg-slate-700 hover:bg-red-600 text-white p-2 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></div>`;
-                    card.querySelector('.load-btn').onclick = () => { levelNameInput.value = p.name; creatorInput.value = p.creator; pixelSizeInput.value = p.gridSize; pixelSizeVal.innerText = p.gridSize+"px"; colorThresholdInput.value = p.blending; colorThresholdVal.innerText = getBlendingLabel(p.blending); updateSpawnUI(p.spawnMode); limitSelector.value = p.limit; if(p.thumb) { const i = new Image(); i.onload = () => { originalImage = i; croppedImage=null; triggerUpdate(); projectsModal.classList.add('hidden'); showNotif("Project Loaded"); }; i.src = p.thumb; } else { showNotif("Could not load image source", "error"); } };
-                    card.querySelector('.del-btn').onclick = async (e) => { if(confirm("Delete this project?")) { await window.deleteDoc(window.doc(window.db, 'artifacts', window.appId, 'users', window.currentUser.uid, 'projects', p.id)); card.remove(); } };
-                    projectsList.appendChild(card);
-                });
-            } catch(e) { console.error(e); projectsList.innerHTML = '<div class="text-center text-red-400 col-span-full">Error loading projects.</div>'; }
-        });
-        closeProjects.addEventListener('click', () => projectsModal.classList.add('hidden'));
     </script>
 </body>
 </html>

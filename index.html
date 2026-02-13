@@ -159,7 +159,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <header class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-center md:text-left">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm title-text">Pixel Art Generator</h1>
-                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.7</p>
+                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.8</p>
             </div>
             <div class="flex items-center gap-2">
                 <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
@@ -331,7 +331,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             <div class="flex items-center gap-1 bg-slate-800/80 rounded-lg border border-slate-700/50 p-1">
                                 <button id="zoomOutBtn" class="p-1 hover:text-white text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></button>
                                 <span id="zoomLevelDisplay" class="text-[9px] font-mono font-bold text-slate-300 w-8 text-center select-none">100%</span>
-                                <button id="zoomInBtn" class="p-1 hover:text-white text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011-1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg></button>
+                                <button id="zoomInBtn" class="p-1 hover:text-white text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg></button>
                             </div>
                             <button id="fullscreenBtn" class="p-2 rounded-lg bg-slate-800/80 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50"><svg id="fsIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
                         </div>
@@ -633,9 +633,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             let sx=canvasW*gridSize/2, sy=canvasH*gridSize/2; if(spawnModeInput.value==='bottom') sy=(canvasH-(doOutline?border:0))*gridSize - gridSize*1.5;
             
             // Default "Single Export" Data (used for preview text)
-            const isCommunity = limit === 2000;
             const singleExportData = { 
-                settings: { name: levelNameInput.value || "Art", creator: (isCommunity?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, 
+                settings: { name: levelNameInput.value || "Art", creator: creatorInput.value||"Player", spawnPosition:[sx,sy], spawnArea:"Main" }, 
                 maps:[{ 
                     name:"Main", 
                     size:[canvasW*gridSize, canvasH*gridSize], 
@@ -662,9 +661,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 const gridSize = parseInt(pixelSizeInput.value), border = parseInt(borderThickness.value), doOutline = enableOutline.checked;
                 const canvasW = currentGeneratedSize[0]/gridSize, canvasH = currentGeneratedSize[1]/gridSize;
                 let sx=canvasW*gridSize/2, sy=canvasH*gridSize/2; if(spawnModeInput.value==='bottom') sy=(canvasH-(doOutline?border:0))*gridSize - gridSize*1.5;
-                const isCommunity = getLimit() === 2000;
                 finalOutput = { 
-                    settings: { name: levelNameInput.value || "Art", creator: (isCommunity?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, 
+                    settings: { name: levelNameInput.value || "Art", creator: creatorInput.value||"Player", spawnPosition:[sx,sy], spawnArea:"Main" }, 
                     maps:[{ 
                         name:"Main", 
                         size:currentGeneratedSize, 

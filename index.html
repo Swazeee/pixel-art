@@ -87,6 +87,31 @@
         }
         
         .title-text { padding-right: 0.5rem; }
+        
+        .modal-bg {
+            background-color: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
+        }
+
+        /* Area Selector Scrollbar */
+        .area-scroll {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .area-card {
+            flex-shrink: 0;
+            width: 80px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .area-card:hover { border-color: #6366f1; }
+        .area-card.selected { border-color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+        .area-thumb { width: 100%; height: 60px; background: #020617; }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen flex flex-col">
@@ -94,13 +119,50 @@
         <span id="notificationText">Notification</span>
     </div>
 
+    <!-- License Modal -->
+    <div id="licenseModal" class="fixed inset-0 z-[130] hidden modal-bg flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-black text-white uppercase italic tracking-tighter">License</h2>
+                <button id="closeLicense" class="text-slate-500 hover:text-white p-2">✕</button>
+            </div>
+            <div class="overflow-y-auto pr-2 text-slate-400 text-xs font-mono whitespace-pre-wrap leading-relaxed select-text">
+BSD 2-Clause License
+
+Copyright (c) 2026, Swazeee
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto w-full flex-grow">
         <header class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-center md:text-left">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm title-text">Pixel Art Generator</h1>
-                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.7.0</p>
+                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.7</p>
             </div>
             <div class="flex items-center gap-2">
+                <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
                 <span class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm">
                     Made by Swazee
                 </span>
@@ -111,21 +173,21 @@
             <!-- Sidebar -->
             <div class="lg:col-span-1 flex flex-col panel rounded-2xl shadow-xl max-h-[85vh] overflow-hidden">
                 <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                    <!-- 1. Image Source -->
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">1. Image Source</label>
+                        <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">1. Image Source</label>
                         <div class="checkerboard-bg border-2 border-dashed border-slate-600 rounded-xl p-6 text-center hover:border-indigo-500 transition-all cursor-pointer relative group">
                             <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                             <div class="pointer-events-none group-hover:scale-105 transition-transform flex flex-col items-center gap-2">
-                                <div class="p-3 bg-slate-900/80 rounded-full shadow-lg backdrop-blur-sm border border-slate-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 <span class="text-[10px] text-slate-300 font-bold block bg-slate-900/80 px-2 py-1 rounded backdrop-blur-sm group-hover:text-white transition-colors">CLICK OR PASTE</span>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 2. Settings -->
                     <div class="space-y-4">
-                        <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">2. Configuration</label>
+                        <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">2. Configuration</label>
                         <div class="space-y-2">
                             <div class="input-group"><input type="text" id="levelName" placeholder="Level Name (Optional)"></div>
                             <div class="input-group"><input type="text" id="creator" placeholder="Creator Name (Optional)"></div>
@@ -133,15 +195,15 @@
                         <div class="space-y-4 pt-2">
                             <div>
                                 <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 mb-2">
-                                    <span>Grid Scale (Base 10)</span>
-                                    <span id="pixelSizeVal" class="text-indigo-400 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-500/20">10px</span>
+                                    <span>Grid Scale</span>
+                                    <span id="pixelSizeVal" class="text-indigo-400">10px</span>
                                 </div>
                                 <input type="range" id="pixelSize" min="10" max="100" step="10" value="10" class="accent-indigo-500">
                             </div>
                             <div>
                                 <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 mb-2">
                                     <span>Color Blending</span>
-                                    <span id="colorThresholdVal" class="text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-500/20">Low</span>
+                                    <span id="colorThresholdVal" class="text-emerald-400">Low</span>
                                 </div>
                                 <input type="range" id="colorThreshold" min="0" max="80" step="1" value="15" class="accent-emerald-500">
                             </div>
@@ -149,9 +211,9 @@
                         <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-700/50 space-y-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-[10px] text-slate-400 font-bold uppercase">Spawn</span>
-                                <div class="flex bg-slate-950/80 p-1 rounded-lg border border-slate-800">
-                                    <button class="spawn-btn text-[9px] px-3 py-1 rounded-md bg-indigo-600 text-white font-bold shadow-sm transition-all" data-val="middle" id="btnSpawnMid">MID</button>
-                                    <button class="spawn-btn text-[9px] px-3 py-1 rounded-md text-slate-500 font-bold hover:text-slate-300 transition-all" data-val="bottom" id="btnSpawnBot">BOT</button>
+                                <div class="flex bg-slate-950/80 p-1 rounded-lg">
+                                    <button class="spawn-btn text-[9px] px-3 py-1 rounded-md bg-indigo-600 text-white font-bold transition-colors" id="btnSpawnMid">MID</button>
+                                    <button class="spawn-btn text-[9px] px-3 py-1 rounded-md text-slate-500 font-bold transition-colors hover:text-slate-300" id="btnSpawnBot">BOT</button>
                                 </div>
                                 <input type="hidden" id="spawnMode" value="middle">
                             </div>
@@ -162,9 +224,33 @@
                         </div>
                     </div>
 
+                    <!-- 3. Merge (New Feature) -->
+                    <div class="space-y-3 pt-4 border-t border-slate-700/50">
+                        <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">3. Merge (Optional)</label>
+                        <div class="bg-slate-900/40 border border-slate-700/50 rounded-xl p-3 space-y-3">
+                            <div class="relative w-full">
+                                <input type="file" id="importLevelInput" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                <div class="w-full bg-slate-800 text-slate-400 text-[10px] font-bold py-2 px-3 rounded-lg border border-slate-700 text-center hover:bg-slate-700 hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                    <span id="importLabel">Import .JSON Level</span>
+                                </div>
+                            </div>
+                            <div id="areaSelectorContainer" class="hidden space-y-3">
+                                <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Select Area to Edit:</p>
+                                <div id="areaList" class="area-scroll scrollbar-hide">
+                                    <!-- Thumbnails injected here -->
+                                </div>
+                                <button id="injectBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-[10px] uppercase shadow-md transition-all">
+                                    Inject Current Art into Area
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outline Settings -->
                     <div class="space-y-3 pt-4 border-t border-slate-700/50">
                         <div class="flex justify-between items-center">
-                            <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">3. Outline</label>
+                            <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">4. Outline</label>
                             <input type="checkbox" id="enableOutline" class="accent-indigo-500 w-4 h-4 cursor-pointer">
                         </div>
                         <div id="outlineSettings" class="hidden space-y-3 bg-slate-900/40 p-3 rounded-xl border border-slate-700/50">
@@ -202,7 +288,7 @@
                     </div>
 
                     <div class="input-group p-1 bg-slate-900/80">
-                        <select id="limitSelector" class="bg-transparent cursor-pointer text-xs font-bold text-slate-300">
+                        <select id="limitSelector" class="bg-transparent cursor-pointer text-xs font-bold text-slate-300 focus:text-indigo-300">
                             <option value="3000">Standard Map (&lt; 3000 Blocks)</option>
                             <option value="2000">Community Upload (&lt; 2000)</option>
                         </select>
@@ -210,13 +296,14 @@
 
                     <div class="flex gap-2">
                         <button id="downloadBtn" disabled class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl transition-all disabled:opacity-50 shadow-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 group">
-                            <span>JSON</span>
+                            <span>Download JSON</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                         </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Preview Area -->
             <div class="lg:col-span-3 space-y-4">
                 <div class="panel rounded-2xl shadow-2xl flex flex-col h-full" id="previewContainer">
                     <div class="flex flex-wrap items-center justify-between px-5 py-4 border-b border-slate-700/50 gap-4 toolbar-header bg-slate-900/20">
@@ -244,7 +331,7 @@
                             <div class="flex items-center gap-1 bg-slate-800/80 rounded-lg border border-slate-700/50 p-1">
                                 <button id="zoomOutBtn" class="p-1 hover:text-white text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></button>
                                 <span id="zoomLevelDisplay" class="text-[9px] font-mono font-bold text-slate-300 w-8 text-center select-none">100%</span>
-                                <button id="zoomInBtn" class="p-1 hover:text-white text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg></button>
+                                <button id="zoomInBtn" class="p-1 hover:text-white text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011-1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg></button>
                             </div>
                             <button id="fullscreenBtn" class="p-2 rounded-lg bg-slate-800/80 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50"><svg id="fsIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
                         </div>
@@ -281,6 +368,7 @@
     </div>
 
     <script>
+        // DOM Elements
         const imageInput = document.getElementById('imageInput');
         const levelNameInput = document.getElementById('levelName');
         const creatorInput = document.getElementById('creator');
@@ -320,8 +408,29 @@
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
         const zoomLevelDisplay = document.getElementById('zoomLevelDisplay');
+        const importLevelInput = document.getElementById('importLevelInput');
+        const importLabel = document.getElementById('importLabel');
+        const areaSelectorContainer = document.getElementById('areaSelectorContainer');
+        const areaList = document.getElementById('areaList');
+        const injectBtn = document.getElementById('injectBtn');
+        const licenseModal = document.getElementById('licenseModal');
+        const openLicenseBtn = document.getElementById('openLicenseBtn');
+        const closeLicense = document.getElementById('closeLicense');
 
-        let originalImage = null, croppedImage = null, currentFilter = 'none', updateTimer = null, isCropMode = false, isDragging = false, startX, startY, endX, endY, isOptimizing = false, currentZoom = 1.0, finalLevelData = null;
+        // License Modal Logic
+        if(openLicenseBtn) openLicenseBtn.addEventListener('click', () => licenseModal.classList.remove('hidden'));
+        if(closeLicense) closeLicense.addEventListener('click', () => licenseModal.classList.add('hidden'));
+
+        let originalImage = null, croppedImage = null, currentFilter = 'none', updateTimer = null, isCropMode = false, isDragging = false, startX, startY, endX, endY, isOptimizing = false, currentZoom = 1.0;
+        
+        // Multi-level state
+        let workingLevelData = null; // The level being assembled
+        let selectedMapIndex = 0;
+        let modifiedMapIndices = new Set(); // Track modified maps
+        
+        // Current generated art state (candidate for injection)
+        let currentGeneratedObjects = [];
+        let currentGeneratedSize = [0, 0];
 
         const showNotif = (msg, type='info') => {
             notifText.innerText = msg;
@@ -356,6 +465,91 @@
         zoomOutBtn.addEventListener('click', () => { if (currentZoom > 0.25) { currentZoom -= 0.25; updateZoomDisplay(); } });
         fullscreenBtn.addEventListener('click', () => { previewContainer.classList.toggle('fullscreen-active'); const isFs = previewContainer.classList.contains('fullscreen-active'); fsIcon.innerHTML = isFs ? '<path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/>' : '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'; document.body.style.overflow = isFs ? 'hidden' : ''; if (isCropMode) syncOverlay(); });
 
+        // === Import Logic ===
+        importLevelInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const json = JSON.parse(ev.target.result);
+                    if (!json.maps || !Array.isArray(json.maps)) { alert("Invalid Skap Level format"); return; }
+                    
+                    workingLevelData = json; // Initialize working copy
+                    modifiedMapIndices = new Set(); // Reset modified list
+                    selectedMapIndex = 0;
+                    
+                    importLabel.innerHTML = `Loaded: <span class='text-white'>${file.name.slice(0, 15)}...</span>`;
+                    importLabel.classList.add('bg-indigo-600', 'text-white'); importLabel.classList.remove('bg-slate-800', 'text-slate-400');
+                    areaSelectorContainer.classList.remove('hidden'); 
+                    downloadBtn.innerText = "Download Full Level";
+                    
+                    renderThumbnails(); 
+                    showNotif("Level Imported Successfully!", "success");
+                } catch (err) { console.error(err); alert("Error parsing JSON file"); }
+            };
+            reader.readAsText(file);
+        });
+
+        function renderThumbnails() {
+            if (!workingLevelData) return;
+            areaList.innerHTML = '';
+            workingLevelData.maps.forEach((map, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = `area-card ${index === selectedMapIndex ? 'selected' : ''} ${modifiedMapIndices.has(index) ? 'modified' : ''}`;
+                
+                wrapper.onclick = () => { 
+                    selectedMapIndex = index; 
+                    renderThumbnails(); // Re-render to update selected status
+                };
+                
+                const canvas = document.createElement('canvas');
+                canvas.className = "area-thumb"; 
+                const ctx = canvas.getContext('2d'); 
+                canvas.width = 100; canvas.height = 75;
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 100, 75);
+                
+                if (map.objects && map.objects.length > 0) {
+                    let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+                    map.objects.forEach(o => { if (o.type === 'block' && o.position && o.size) { minX = Math.min(minX, o.position[0]); maxX = Math.max(maxX, o.position[0] + o.size[0]); minY = Math.min(minY, o.position[1]); maxY = Math.max(maxY, o.position[1] + o.size[1]); } });
+                    if(minX !== Infinity) { 
+                        const mapW = maxX - minX || 100; const mapH = maxY - minY || 100; 
+                        const scale = Math.min(100/mapW, 75/mapH) * 0.9; 
+                        map.objects.forEach(o => { 
+                            if(o.type === 'block') { 
+                                const c = o.color || [100,100,100]; 
+                                ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; 
+                                ctx.fillRect((o.position[0]-minX)*scale + 5, (o.position[1]-minY)*scale + 5, o.size[0]*scale, o.size[1]*scale); 
+                            } 
+                        }); 
+                    }
+                }
+                const label = document.createElement('div'); 
+                label.className = "text-[9px] text-center text-slate-300 py-1 truncate px-1"; 
+                label.innerText = map.name || `Area ${index+1}`; 
+                wrapper.appendChild(canvas); wrapper.appendChild(label); areaList.appendChild(wrapper);
+            });
+        }
+
+        // === Inject Logic ===
+        injectBtn.addEventListener('click', () => {
+            if (!workingLevelData) { showNotif("No level imported!", "error"); return; }
+            if (currentGeneratedObjects.length === 0) { showNotif("No pixel art generated!", "error"); return; }
+            
+            // Destructively replace objects in the selected map
+            workingLevelData.maps[selectedMapIndex].objects = [...currentGeneratedObjects];
+            // Update Size strictly
+            workingLevelData.maps[selectedMapIndex].size = [...currentGeneratedSize];
+            // Ensure Area Color
+            if (!workingLevelData.maps[selectedMapIndex].areaColor) {
+                workingLevelData.maps[selectedMapIndex].areaColor = [230, 230, 230];
+            }
+
+            modifiedMapIndices.add(selectedMapIndex);
+            renderThumbnails();
+            showNotif(`Art injected into Area ${selectedMapIndex + 1}!`, "success");
+        });
+
         function applyFilter(r, g, b) { if (currentFilter === 'none') return [r, g, b]; if (currentFilter === 'grayscale') { const v = 0.3 * r + 0.59 * g + 0.11 * b; return [v, v, v]; } if (currentFilter === 'invert') return [255-r, 255-g, 255-b]; if (currentFilter === 'gameboy') { const avg = (r+g+b)/3; if(avg < 64) return [15, 56, 15]; if(avg < 128) return [48, 98, 48]; if(avg < 192) return [139, 172, 15]; return [155, 188, 15]; } if (currentFilter === 'contrast') { const f = (259 * (128 + 255)) / (255 * (259 - 128)); return [(f*(r-128)+128), (f*(g-128)+128), (f*(b-128)+128)].map(v => Math.max(0, Math.min(255, v))); } if (currentFilter === 'sepia') return [(r*.393)+(g*.769)+(b*.189), (r*.349)+(g*.686)+(b*.168), (r*.272)+(g*.534)+(b*.131)]; return [r, g, b]; }
         function hexToRgb(hex) { const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return res ? [parseInt(res[1], 16), parseInt(res[2], 16), parseInt(res[3], 16)] : [0, 0, 0]; }
         function applyZoomStyles() { if(!previewCanvas) return; const w = previewCanvas.width, h = previewCanvas.height, gridSize = parseInt(pixelSizeInput.value); previewCanvas.style.width = (w * gridSize * currentZoom) + 'px'; previewCanvas.style.height = (h * gridSize * currentZoom) + 'px'; if(isCropMode) syncOverlay(); }
@@ -386,12 +580,28 @@
             const img = croppedImage || originalImage, gridSize = parseInt(pixelSizeInput.value), blend = parseInt(colorThresholdInput.value), doOutline = enableOutline.checked, border = parseInt(borderThickness.value), oRgb = hexToRgb(outlineColor.value), limit = getLimit();
             const sampleW = Math.ceil(img.width/gridSize), sampleH = Math.ceil(img.height/gridSize);
             const tCtx = document.createElement('canvas').getContext('2d'); tCtx.canvas.width = sampleW; tCtx.canvas.height = sampleH; tCtx.drawImage(img, 0, 0, sampleW, sampleH); const data = tCtx.getImageData(0, 0, sampleW, sampleH).data;
-            const grid = [], palette = [];
-            for(let y=0; y<sampleH; y++) { grid[y] = []; for(let x=0; x<sampleW; x++) { const i = (y*sampleW+x)*4; if(data[i+3] < 20) { grid[y][x]=null; continue; } let [r,g,b] = applyFilter(data[i], data[i+1], data[i+2]); if (blend > 0) { const m = palette.find(p => Math.sqrt((r-p.r)**2 + (g-p.g)**2 + (b-p.b)**2) < blend); if(m) { r=m.r; g=m.g; b=m.b; } else palette.push({r,g,b}); } grid[y][x] = {r,g,b, used: false}; } }
+            
+            // Re-implement grid logic exactly matching updatePreview to ensure color accuracy
+            const grid = Array(sampleH).fill(null).map(() => Array(sampleW).fill(null));
+            const palette = [];
+            
+            for (let i = 0; i < data.length; i += 4) { 
+                if (data[i+3] < 20) continue; 
+                const x = (i/4)%sampleW, y = Math.floor((i/4)/sampleW); 
+                let [r, g, b] = applyFilter(data[i], data[i+1], data[i+2]); 
+                if (blend > 0) { 
+                    const m = palette.find(p => Math.sqrt((r-p.r)**2 + (g-p.g)**2 + (b-p.b)**2) < blend); 
+                    if (m) { r = m.r; g = m.g; b = m.b; } 
+                    else { palette.push({r, g, b}); } 
+                } 
+                grid[y][x] = {r, g, b, used: false}; 
+            }
+
             const canvasW = doOutline ? sampleW + border*2 : sampleW, canvasH = doOutline ? sampleH + border*2 : sampleH; const fullGrid = Array(canvasH).fill(0).map(() => Array(canvasW).fill(null));
             for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const rx=doOutline?x-border:x, ry=doOutline?y-border:y; const cell = (rx>=0 && ry>=0 && rx<sampleW && ry<sampleH) ? grid[ry][rx] : null; if(cell) fullGrid[y][x] = { ...cell, isOutline: false }; else if(doOutline) { let isB = false; for(let dy=-border;dy<=border;dy++) { for(let dx=-border;dx<=border;dx++){ const nx=rx+dx, ny=ry+dy; if(nx>=0 && ny>=0 && nx<sampleW && ny<sampleH && grid[ny][nx]) { isB=true; break; } } if(isB) break; } if(isB) fullGrid[y][x] = { r:oRgb[0], g:oRgb[1], b:oRgb[2], used: false, isOutline: true }; } } }
+            
             const objs = [], artCol = collideCheckbox.checked, outCol = outlineCollide.checked;
-            for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const cell = fullGrid[y][x]; if(!cell || cell.used) continue; let w=1; while(x+w<canvasW) { const n=fullGrid[y][x+w]; if(!n || n.used || n.r!==cell.r || n.g!==cell.g || n.b!==cell.b || n.isOutline!==cell.isOutline) break; w++; } let h=1; while(y+h<canvasH) { let ok=true; for(let dx=0;dx<w;dx++) { const n=fullGrid[y+h][x+dx]; if(!n || n.used || n.r!==cell.r || n.g!==cell.g || n.b!==cell.b || n.isOutline!==cell.isOutline) { ok=false; break; } } if(!ok) break; h++; } for(let dy=0;dy<h;dy++) for(let dx=0;dx<w;dx++) fullGrid[y+dy][x+dx].used=true; objs.push({ type:"block", position:[x*gridSize, y*gridSize], size:[w*gridSize, h*gridSize], color:[cell.r, cell.g, cell.b], collide:cell.isOutline?outCol:artCol }); } }
+            for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const cell = fullGrid[y][x]; if(!cell || cell.used) continue; let w=1; while(x+w<canvasW) { const n=fullGrid[y][x+w]; if(!n || n.used || n.r!==cell.r || n.g!==cell.g || n.b!==cell.b || n.isOutline!==cell.isOutline) break; w++; } let h=1; while(y+h<canvasH) { let ok=true; for(let dx=0;dx<w;dx++) { const n=fullGrid[y+h][x+dx]; if(!n || n.used || n.r!==cell.r || n.g!==cell.g || n.b!==cell.b || n.isOutline!==cell.isOutline) { ok=false; break; } } if(!ok) break; h++; } for(let dy=0;dy<h;dy++) for(let dx=0;dx<w;dx++) fullGrid[y+dy][x+dx].used=true; objs.push({ type:"block", position:[x*gridSize, y*gridSize], size:[w*gridSize, h*gridSize], color:[cell.r, cell.g, cell.b], opacity: 1, layer: 0, collide:cell.isOutline?outCol:artCol }); } }
             
             if (objs.length > limit) {
                 const MAX_GRID = 100, MAX_BLEND = 80;
@@ -413,18 +623,62 @@
                 downloadBtn.disabled=false; blockCountSpan.className="text-xl font-black text-indigo-400 leading-none"; 
             }
 
+            // Update candidate objects and size
+            currentGeneratedObjects = objs;
+            currentGeneratedSize = [canvasW*gridSize, canvasH*gridSize];
+
             blockCountSpan.innerText = objs.length; worldDimTextSpan.innerText = `${canvasW*gridSize}x${canvasH*gridSize}`;
+            
+            // Build Single-Level Preview Data
             let sx=canvasW*gridSize/2, sy=canvasH*gridSize/2; if(spawnModeInput.value==='bottom') sy=(canvasH-(doOutline?border:0))*gridSize - gridSize*1.5;
             
-            // Revert back to respecting the "Community" dropdown check or user input
-            // If community upload (2000 blocks), force "Swazee" unless cloud save logic handles it separately. 
-            // In the "no cloud" version, we stick to the local file logic.
+            // Default "Single Export" Data (used for preview text)
             const isCommunity = limit === 2000;
-            finalLevelData = { settings: { name: levelNameInput.value || "Art", creator: (isCommunity?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, maps:[{ name:"Main", size:[canvasW*gridSize, canvasH*gridSize], backgroundColor:[15,23,42,1], objects:objs }] };
-            const str = JSON.stringify(finalLevelData, null, 2); jsonPreview.innerText = str.length>1000?str.slice(0,1000)+'...':str;
+            const singleExportData = { 
+                settings: { name: levelNameInput.value || "Art", creator: (isCommunity?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, 
+                maps:[{ 
+                    name:"Main", 
+                    size:[canvasW*gridSize, canvasH*gridSize], 
+                    backgroundColor:[15,23,42,1], 
+                    areaColor: [230, 230, 230], 
+                    objects:objs 
+                }] 
+            };
+
+            const str = JSON.stringify(singleExportData, null, 2); jsonPreview.innerText = str.length>1000?str.slice(0,1000)+'...':str;
         }
 
-        downloadBtn.addEventListener('click', () => { const b = new Blob([JSON.stringify(finalLevelData)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = (levelNameInput.value||'art')+'.json'; a.click(); });
+        downloadBtn.addEventListener('click', () => { 
+            // Decide what to download: Full Merged Level OR Single Art
+            const dataToDownload = workingLevelData ? workingLevelData : JSON.parse(jsonPreview.innerText); // Reconstruct from preview or state
+            // If Single mode (no workingLevelData), we should regenerate strictly to be safe, but grabbing from generateData's implicit state is better.
+            // Actually, let's just use the currentGeneratedObjects if Single mode.
+            
+            let finalOutput;
+            if (workingLevelData) {
+                finalOutput = workingLevelData; // Download the accumulated level
+            } else {
+                // Rebuild single export
+                const gridSize = parseInt(pixelSizeInput.value), border = parseInt(borderThickness.value), doOutline = enableOutline.checked;
+                const canvasW = currentGeneratedSize[0]/gridSize, canvasH = currentGeneratedSize[1]/gridSize;
+                let sx=canvasW*gridSize/2, sy=canvasH*gridSize/2; if(spawnModeInput.value==='bottom') sy=(canvasH-(doOutline?border:0))*gridSize - gridSize*1.5;
+                const isCommunity = getLimit() === 2000;
+                finalOutput = { 
+                    settings: { name: levelNameInput.value || "Art", creator: (isCommunity?"Swazee":creatorInput.value||"Player"), spawnPosition:[sx,sy], spawnArea:"Main" }, 
+                    maps:[{ 
+                        name:"Main", 
+                        size:currentGeneratedSize, 
+                        backgroundColor:[15,23,42,1], 
+                        areaColor: [230, 230, 230], 
+                        objects:currentGeneratedObjects 
+                    }] 
+                };
+            }
+
+            const b = new Blob([JSON.stringify(finalOutput)], {type:'application/json'}); 
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = (levelNameInput.value||'art')+'.json'; a.click(); 
+        });
+        
         cropToggleBtn.addEventListener('click', () => { isCropMode = !isCropMode; cropToggleBtn.innerText = isCropMode ? "End Crop" : "Crop"; cropToggleBtn.className = isCropMode ? "tool-btn bg-amber-600 text-white" : "tool-btn bg-slate-800 text-slate-300"; cropOverlay.style.display = isCropMode ? 'block' : 'none'; cropHelp.classList.toggle('hidden', !isCropMode); if (isCropMode) syncOverlay(); });
         const syncOverlay = () => { cropOverlay.width = previewCanvas.width; cropOverlay.height = previewCanvas.height; cropOverlay.style.width = previewCanvas.style.width; cropOverlay.style.height = previewCanvas.style.height; };
         resetCropBtn.addEventListener('click', () => { croppedImage = null; resetCropBtn.disabled = true; triggerUpdate(); });

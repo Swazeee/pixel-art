@@ -5,102 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Art Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase Integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        let db = null;
-        let globalStatsRef = null;
-        let auth = null;
-
-        try {
-            // Safe config parsing
-            let config = {};
-            if (typeof window.__firebase_config === 'string') {
-                config = JSON.parse(window.__firebase_config);
-            } else if (typeof window.__firebase_config === 'object') {
-                config = window.__firebase_config;
-            }
-
-            if (config && config.apiKey) {
-                const app = initializeApp(config);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                const appId = window.__app_id || 'pixel-art-gen';
-                
-                // Path: /artifacts/{appId}/public/data/stats/global
-                globalStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'global');
-
-                const initAuth = async () => {
-                    try {
-                        if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
-                            await signInWithCustomToken(auth, window.__initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (e) {
-                        console.warn("Auth failed, attempting fallback", e);
-                        try { await signInAnonymously(auth); } catch(e2) { console.error("Offline mode", e2); }
-                    }
-                };
-
-                initAuth();
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user && globalStatsRef) {
-                        onSnapshot(globalStatsRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                const count = docSnap.data().total_arts || 0;
-                                updateCounterDisplay(count);
-                            } else {
-                                setDoc(globalStatsRef, { total_arts: 0 }, { merge: true }).catch(err => console.log("Init stats failed", err));
-                            }
-                        }, (error) => {
-                            console.log("Stats listener error (offline):", error.code);
-                        });
-                    }
-                });
-            }
-        } catch (e) {
-            console.log("Running in offline/local mode.", e);
-        }
-
-        // Global function to update display
-        window.updateCounterDisplay = (val) => {
-            const el = document.getElementById('totalCounter');
-            if (el) {
-                el.style.transform = "scale(1.5)";
-                el.style.color = "#4ade80"; 
-                setTimeout(() => {
-                    el.style.transform = "scale(1)";
-                    el.style.color = "";
-                }, 200);
-                el.innerText = val.toLocaleString();
-            }
-        };
-
-        // Global increment function
-        window.incrementGlobalCounter = async () => {
-            // 1. Local update
-            let localCount = parseInt(localStorage.getItem('swazee_pixel_art_count')) || 0;
-            localCount++;
-            localStorage.setItem('swazee_pixel_art_count', localCount);
-            
-            // 2. Cloud update
-            if (db && globalStatsRef && auth && auth.currentUser) {
-                try {
-                    await updateDoc(globalStatsRef, { total_arts: increment(1) });
-                } catch (e) {
-                    console.error("Cloud update failed", e);
-                    window.updateCounterDisplay(localCount + " (Local)");
-                }
-            } else {
-                window.updateCounterDisplay(localCount + " (Local)");
-            }
-        };
-    </script>
     <style>
         body {
             background-color: #0f172a;
@@ -117,7 +21,9 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
+
         .checkerboard-bg { background-color: #020617; }
+
 
         .input-group {
             background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; transition: all 0.2s;
@@ -138,13 +44,16 @@
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px; }
 
+
         .canvas-container {
             image-rendering: pixelated; width: 100%; height: 100%; overflow: auto; 
             background-color: #020617; display: grid; place-items: center;
             min-height: 500px; border-radius: 0.75rem; border: 2px dashed #334155; position: relative;
         }
 
+
         #previewContainer:not(.fullscreen-active) canvas { object-fit: contain; }
+
 
         .fullscreen-active {
             position: fixed !important; inset: 0 !important; z-index: 100 !important;
@@ -157,6 +66,7 @@
         }
         .fullscreen-active .toolbar-header { padding: 1rem 2rem; background: #0f172a; border-bottom: 1px solid #1e293b; }
 
+
         canvas { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); image-rendering: pixelated; max-width: none; max-height: none; }
         #cropOverlay { position: absolute; top: 0; left: 0; cursor: crosshair; display: none; z-index: 10; }
         
@@ -166,11 +76,13 @@
         }
         #limitNotification.show { transform: translateY(0) translateX(-50%); opacity: 1; }
 
+
         .error-overlay {
             position: absolute; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 20; text-align: center; padding: 2rem;
         }
+
 
         .tool-btn {
             display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem;
@@ -187,6 +99,7 @@
         .modal-bg {
             background-color: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
         }
+
 
         /* Area Selector Scrollbar */
         .area-scroll {
@@ -207,31 +120,14 @@
         }
         .area-card:hover { border-color: #6366f1; }
         .area-card.selected { border-color: #4ade80; background: rgba(74, 222, 128, 0.1); }
-        .area-card.modified::after {
-            content: '✓';
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #4ade80;
-            color: #064e3b;
-            font-size: 8px;
-            font-weight: bold;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
         .area-thumb { width: 100%; height: 60px; background: #020617; }
-        
-        #totalCounter { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen flex flex-col">
     <div id="limitNotification" class="fixed bottom-8 left-1/2 z-[110] bg-indigo-600 border border-indigo-400 text-white px-6 py-3 rounded-full shadow-2xl font-bold flex items-center gap-3">
         <span id="notificationText">Notification</span>
     </div>
+
 
     <!-- License Modal -->
     <div id="licenseModal" class="fixed inset-0 z-[130] hidden modal-bg flex items-center justify-center p-4">
@@ -243,17 +139,22 @@
             <div class="overflow-y-auto pr-2 text-slate-400 text-xs font-mono whitespace-pre-wrap leading-relaxed select-text">
 BSD 2-Clause License
 
+
 Copyright (c) 2026, Swazeee
+
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
+
 1. Redistributions of source code must retain the above copyright notice, this
    list of conditions and the following disclaimer.
+
 
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
+
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -269,27 +170,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </div>
     </div>
 
+
     <div class="max-w-7xl mx-auto w-full flex-grow">
         <header class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-center md:text-left">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm title-text">Pixel Art Generator</h1>
-                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v3.0.3</p>
+                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.8</p>
             </div>
-            <div class="flex flex-col md:flex-row items-center gap-3">
-                <!-- Global Counter -->
-                <div class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-4 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm flex items-center gap-2">
-                    <span>Total Art Created:</span>
-                    <span id="totalCounter" class="text-indigo-400 text-xs">0</span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
-                    <span class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm">
-                        Made by Swazee
-                    </span>
-                </div>
+            <div class="flex items-center gap-2">
+                <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
+                <span class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm">
+                    Made by Swazee
+                </span>
             </div>
         </header>
+
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Sidebar -->
@@ -306,6 +201,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             </div>
                         </div>
                     </div>
+
 
                     <!-- 2. Settings -->
                     <div class="space-y-4">
@@ -346,6 +242,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         </div>
                     </div>
 
+
                     <!-- 3. Merge (New Feature) -->
                     <div class="space-y-3 pt-4 border-t border-slate-700/50">
                         <label class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">3. Merge (Optional)</label>
@@ -368,6 +265,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Outline Settings -->
                     <div class="space-y-3 pt-4 border-t border-slate-700/50">
@@ -397,6 +295,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     </div>
                 </div>
 
+
                 <div class="p-5 pt-4 border-t border-slate-700/50 bg-slate-900/40 shrink-0 space-y-4 z-10 relative backdrop-blur-md">
                     <div class="grid grid-cols-2 gap-2 text-center">
                         <div class="bg-slate-950/50 border border-slate-800 p-2.5 rounded-xl shadow-inner">
@@ -409,12 +308,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         </div>
                     </div>
 
+
                     <div class="input-group p-1 bg-slate-900/80">
                         <select id="limitSelector" class="bg-transparent cursor-pointer text-xs font-bold text-slate-300 focus:text-indigo-300">
                             <option value="3000">Standard Map (&lt; 3000 Blocks)</option>
                             <option value="2000">Community Upload (&lt; 2000)</option>
                         </select>
                     </div>
+
 
                     <div class="flex gap-2">
                         <button id="downloadBtn" disabled class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl transition-all disabled:opacity-50 shadow-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 group">
@@ -424,6 +325,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     </div>
                 </div>
             </div>
+
 
             <!-- Preview Area -->
             <div class="lg:col-span-3 space-y-4">
@@ -489,6 +391,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </div>
     </div>
 
+
     <script>
         // DOM Elements
         const imageInput = document.getElementById('imageInput');
@@ -538,18 +441,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         const licenseModal = document.getElementById('licenseModal');
         const openLicenseBtn = document.getElementById('openLicenseBtn');
         const closeLicense = document.getElementById('closeLicense');
-        const totalCounterSpan = document.getElementById('totalCounter');
+
 
         // License Modal Logic
         if(openLicenseBtn) openLicenseBtn.addEventListener('click', () => licenseModal.classList.remove('hidden'));
         if(closeLicense) closeLicense.addEventListener('click', () => licenseModal.classList.add('hidden'));
 
+
         let originalImage = null, croppedImage = null, currentFilter = 'none', updateTimer = null, isCropMode = false, isDragging = false, startX, startY, endX, endY, isOptimizing = false, currentZoom = 1.0;
         
-        // Counter Logic
-        let totalArts = parseInt(localStorage.getItem('swazee_pixel_art_count')) || 0;
-        if(totalCounterSpan) totalCounterSpan.innerText = totalArts.toLocaleString();
-
         // Multi-level state
         let workingLevelData = null; // The level being assembled
         let selectedMapIndex = 0;
@@ -558,6 +458,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         // Current generated art state (candidate for injection)
         let currentGeneratedObjects = [];
         let currentGeneratedSize = [0, 0];
+
 
         const showNotif = (msg, type='info') => {
             notifText.innerText = msg;
@@ -592,6 +493,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         zoomOutBtn.addEventListener('click', () => { if (currentZoom > 0.25) { currentZoom -= 0.25; updateZoomDisplay(); } });
         fullscreenBtn.addEventListener('click', () => { previewContainer.classList.toggle('fullscreen-active'); const isFs = previewContainer.classList.contains('fullscreen-active'); fsIcon.innerHTML = isFs ? '<path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/>' : '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'; document.body.style.overflow = isFs ? 'hidden' : ''; if (isCropMode) syncOverlay(); });
 
+
         // === Import Logic ===
         importLevelInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -617,6 +519,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             };
             reader.readAsText(file);
         });
+
 
         function renderThumbnails() {
             if (!workingLevelData) return;
@@ -658,6 +561,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             });
         }
 
+
         // === Inject Logic ===
         injectBtn.addEventListener('click', () => {
             if (!workingLevelData) { showNotif("No level imported!", "error"); return; }
@@ -672,11 +576,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 workingLevelData.maps[selectedMapIndex].areaColor = [230, 230, 230];
             }
 
+
             modifiedMapIndices.add(selectedMapIndex);
             renderThumbnails();
-            window.incrementGlobalCounter(); // Track injection
             showNotif(`Art injected into Area ${selectedMapIndex + 1}!`, "success");
         });
+
 
         function applyFilter(r, g, b) { if (currentFilter === 'none') return [r, g, b]; if (currentFilter === 'grayscale') { const v = 0.3 * r + 0.59 * g + 0.11 * b; return [v, v, v]; } if (currentFilter === 'invert') return [255-r, 255-g, 255-b]; if (currentFilter === 'gameboy') { const avg = (r+g+b)/3; if(avg < 64) return [15, 56, 15]; if(avg < 128) return [48, 98, 48]; if(avg < 192) return [139, 172, 15]; return [155, 188, 15]; } if (currentFilter === 'contrast') { const f = (259 * (128 + 255)) / (255 * (259 - 128)); return [(f*(r-128)+128), (f*(g-128)+128), (f*(b-128)+128)].map(v => Math.max(0, Math.min(255, v))); } if (currentFilter === 'sepia') return [(r*.393)+(g*.769)+(b*.189), (r*.349)+(g*.686)+(b*.168), (r*.272)+(g*.534)+(b*.131)]; return [r, g, b]; }
         function hexToRgb(hex) { const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return res ? [parseInt(res[1], 16), parseInt(res[2], 16), parseInt(res[3], 16)] : [0, 0, 0]; }
@@ -700,8 +605,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             if(isCropMode) syncOverlay();
         }
 
+
         const bannedTerms = ["badword", "offensive"];
         const containsProfanity = (text) => text && bannedTerms.some(w => text.toLowerCase().includes(w));
+
 
         function generateData() {
             if (!originalImage) return; errorOverlay.classList.add('hidden');
@@ -724,6 +631,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 } 
                 grid[y][x] = {r, g, b, used: false}; 
             }
+
 
             const canvasW = doOutline ? sampleW + border*2 : sampleW, canvasH = doOutline ? sampleH + border*2 : sampleH; const fullGrid = Array(canvasH).fill(0).map(() => Array(canvasW).fill(null));
             for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const rx=doOutline?x-border:x, ry=doOutline?y-border:y; const cell = (rx>=0 && ry>=0 && rx<sampleW && ry<sampleH) ? grid[ry][rx] : null; if(cell) fullGrid[y][x] = { ...cell, isOutline: false }; else if(doOutline) { let isB = false; for(let dy=-border;dy<=border;dy++) { for(let dx=-border;dx<=border;dx++){ const nx=rx+dx, ny=ry+dy; if(nx>=0 && ny>=0 && nx<sampleW && ny<sampleH && grid[ny][nx]) { isB=true; break; } } if(isB) break; } if(isB) fullGrid[y][x] = { r:oRgb[0], g:oRgb[1], b:oRgb[2], used: false, isOutline: true }; } } }
@@ -751,9 +659,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 downloadBtn.disabled=false; blockCountSpan.className="text-xl font-black text-indigo-400 leading-none"; 
             }
 
+
             // Update candidate objects and size
             currentGeneratedObjects = objs;
             currentGeneratedSize = [canvasW*gridSize, canvasH*gridSize];
+
 
             blockCountSpan.innerText = objs.length; worldDimTextSpan.innerText = `${canvasW*gridSize}x${canvasH*gridSize}`;
             
@@ -765,17 +675,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 settings: { name: levelNameInput.value || "Art", creator: creatorInput.value||"Player", spawnPosition:[sx,sy], spawnArea:"Main" }, 
                 maps:[{ 
                     name:"Main", 
-                    size:currentGeneratedSize, 
+                    size:[canvasW*gridSize, canvasH*gridSize], 
                     backgroundColor:[15,23,42,1], 
                     areaColor: [230, 230, 230], 
                     objects:objs 
                 }] 
             };
 
+
             const str = JSON.stringify(singleExportData, null, 2); jsonPreview.innerText = str.length>1000?str.slice(0,1000)+'...':str;
         }
 
+
         downloadBtn.addEventListener('click', () => { 
+            // Decide what to download: Full Merged Level OR Single Art
+            const dataToDownload = workingLevelData ? workingLevelData : JSON.parse(jsonPreview.innerText); // Reconstruct from preview or state
+            // If Single mode (no workingLevelData), we should regenerate strictly to be safe, but grabbing from generateData's implicit state is better.
+            // Actually, let's just use the currentGeneratedObjects if Single mode.
+            
             let finalOutput;
             if (workingLevelData) {
                 finalOutput = workingLevelData; // Download the accumulated level
@@ -796,7 +713,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 };
             }
 
-            window.incrementGlobalCounter(); // Track download
+
             const b = new Blob([JSON.stringify(finalOutput)], {type:'application/json'}); 
             const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = (levelNameInput.value||'art')+'.json'; a.click(); 
         });
@@ -811,3 +728,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </script>
 </body>
 </html>
+
+
+

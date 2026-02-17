@@ -5,6 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Art Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let db = null;
+        let globalStatsRef = null;
+        let auth = null;
+
+        try {
+            // Safe config parsing
+            let config = {};
+            if (typeof window.__firebase_config === 'string') {
+                config = JSON.parse(window.__firebase_config);
+            } else if (typeof window.__firebase_config === 'object') {
+                config = window.__firebase_config;
+            }
+
+            if (config && config.apiKey) {
+                const app = initializeApp(config);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                const appId = window.__app_id || 'pixel-art-gen';
+                
+                // Path: /artifacts/{appId}/public/data/stats/global
+                globalStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'global');
+
+                const initAuth = async () => {
+                    try {
+                        if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
+                            await signInWithCustomToken(auth, window.__initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) {
+                        console.warn("Auth failed, attempting fallback", e);
+                        try { await signInAnonymously(auth); } catch(e2) { console.error("Offline mode", e2); }
+                    }
+                };
+
+                initAuth();
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user && globalStatsRef) {
+                        onSnapshot(globalStatsRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                const count = docSnap.data().total_arts || 0;
+                                updateCounterDisplay(count);
+                            } else {
+                                setDoc(globalStatsRef, { total_arts: 0 }, { merge: true }).catch(err => console.log("Init stats failed", err));
+                            }
+                        }, (error) => {
+                            console.log("Stats listener error (offline):", error.code);
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Running in offline/local mode.", e);
+        }
+
+        // Global function to update display
+        window.updateCounterDisplay = (val) => {
+            const el = document.getElementById('totalCounter');
+            if (el) {
+                el.style.transform = "scale(1.5)";
+                el.style.color = "#4ade80"; 
+                setTimeout(() => {
+                    el.style.transform = "scale(1)";
+                    el.style.color = "";
+                }, 200);
+                el.innerText = val.toLocaleString();
+            }
+        };
+
+        // Global increment function
+        window.incrementGlobalCounter = async () => {
+            // 1. Local update
+            let localCount = parseInt(localStorage.getItem('swazee_pixel_art_count')) || 0;
+            localCount++;
+            localStorage.setItem('swazee_pixel_art_count', localCount);
+            
+            // 2. Cloud update
+            if (db && globalStatsRef && auth && auth.currentUser) {
+                try {
+                    await updateDoc(globalStatsRef, { total_arts: increment(1) });
+                } catch (e) {
+                    console.error("Cloud update failed", e);
+                    window.updateCounterDisplay(localCount + " (Local)");
+                }
+            } else {
+                window.updateCounterDisplay(localCount + " (Local)");
+            }
+        };
+    </script>
     <style>
         body {
             background-color: #0f172a;
@@ -111,7 +207,25 @@
         }
         .area-card:hover { border-color: #6366f1; }
         .area-card.selected { border-color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+        .area-card.modified::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #4ade80;
+            color: #064e3b;
+            font-size: 8px;
+            font-weight: bold;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .area-thumb { width: 100%; height: 60px; background: #020617; }
+        
+        #totalCounter { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen flex flex-col">
@@ -159,13 +273,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <header class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-center md:text-left">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm title-text">Pixel Art Generator</h1>
-                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.8</p>
+                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v3.0.3</p>
             </div>
-            <div class="flex items-center gap-2">
-                <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
-                <span class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm">
-                    Made by Swazee
-                </span>
+            <div class="flex flex-col md:flex-row items-center gap-3">
+                <!-- Global Counter -->
+                <div class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-4 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm flex items-center gap-2">
+                    <span>Total Art Created:</span>
+                    <span id="totalCounter" class="text-indigo-400 text-xs">0</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
+                    <span class="bg-slate-900/80 border border-slate-700/50 text-slate-400 text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-sm">
+                        Made by Swazee
+                    </span>
+                </div>
             </div>
         </header>
 
@@ -416,6 +538,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         const licenseModal = document.getElementById('licenseModal');
         const openLicenseBtn = document.getElementById('openLicenseBtn');
         const closeLicense = document.getElementById('closeLicense');
+        const totalCounterSpan = document.getElementById('totalCounter');
 
         // License Modal Logic
         if(openLicenseBtn) openLicenseBtn.addEventListener('click', () => licenseModal.classList.remove('hidden'));
@@ -423,6 +546,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         let originalImage = null, croppedImage = null, currentFilter = 'none', updateTimer = null, isCropMode = false, isDragging = false, startX, startY, endX, endY, isOptimizing = false, currentZoom = 1.0;
         
+        // Counter Logic
+        let totalArts = parseInt(localStorage.getItem('swazee_pixel_art_count')) || 0;
+        if(totalCounterSpan) totalCounterSpan.innerText = totalArts.toLocaleString();
+
         // Multi-level state
         let workingLevelData = null; // The level being assembled
         let selectedMapIndex = 0;
@@ -547,6 +674,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
             modifiedMapIndices.add(selectedMapIndex);
             renderThumbnails();
+            window.incrementGlobalCounter(); // Track injection
             showNotif(`Art injected into Area ${selectedMapIndex + 1}!`, "success");
         });
 
@@ -637,7 +765,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 settings: { name: levelNameInput.value || "Art", creator: creatorInput.value||"Player", spawnPosition:[sx,sy], spawnArea:"Main" }, 
                 maps:[{ 
                     name:"Main", 
-                    size:[canvasW*gridSize, canvasH*gridSize], 
+                    size:currentGeneratedSize, 
                     backgroundColor:[15,23,42,1], 
                     areaColor: [230, 230, 230], 
                     objects:objs 
@@ -648,11 +776,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
 
         downloadBtn.addEventListener('click', () => { 
-            // Decide what to download: Full Merged Level OR Single Art
-            const dataToDownload = workingLevelData ? workingLevelData : JSON.parse(jsonPreview.innerText); // Reconstruct from preview or state
-            // If Single mode (no workingLevelData), we should regenerate strictly to be safe, but grabbing from generateData's implicit state is better.
-            // Actually, let's just use the currentGeneratedObjects if Single mode.
-            
             let finalOutput;
             if (workingLevelData) {
                 finalOutput = workingLevelData; // Download the accumulated level
@@ -673,6 +796,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 };
             }
 
+            window.incrementGlobalCounter(); // Track download
             const b = new Blob([JSON.stringify(finalOutput)], {type:'application/json'}); 
             const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = (levelNameInput.value||'art')+'.json'; a.click(); 
         });

@@ -21,9 +21,7 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-
         .checkerboard-bg { background-color: #020617; }
-
 
         .input-group {
             background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; transition: all 0.2s;
@@ -44,16 +42,13 @@
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px; }
 
-
         .canvas-container {
             image-rendering: pixelated; width: 100%; height: 100%; overflow: auto; 
             background-color: #020617; display: grid; place-items: center;
             min-height: 500px; border-radius: 0.75rem; border: 2px dashed #334155; position: relative;
         }
 
-
         #previewContainer:not(.fullscreen-active) canvas { object-fit: contain; }
-
 
         .fullscreen-active {
             position: fixed !important; inset: 0 !important; z-index: 100 !important;
@@ -66,7 +61,6 @@
         }
         .fullscreen-active .toolbar-header { padding: 1rem 2rem; background: #0f172a; border-bottom: 1px solid #1e293b; }
 
-
         canvas { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); image-rendering: pixelated; max-width: none; max-height: none; }
         #cropOverlay { position: absolute; top: 0; left: 0; cursor: crosshair; display: none; z-index: 10; }
         
@@ -76,13 +70,11 @@
         }
         #limitNotification.show { transform: translateY(0) translateX(-50%); opacity: 1; }
 
-
         .error-overlay {
             position: absolute; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 20; text-align: center; padding: 2rem;
         }
-
 
         .tool-btn {
             display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem;
@@ -99,7 +91,6 @@
         .modal-bg {
             background-color: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
         }
-
 
         /* Area Selector Scrollbar */
         .area-scroll {
@@ -128,7 +119,6 @@
         <span id="notificationText">Notification</span>
     </div>
 
-
     <!-- License Modal -->
     <div id="licenseModal" class="fixed inset-0 z-[130] hidden modal-bg flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative flex flex-col max-h-[85vh]">
@@ -139,22 +129,17 @@
             <div class="overflow-y-auto pr-2 text-slate-400 text-xs font-mono whitespace-pre-wrap leading-relaxed select-text">
 BSD 2-Clause License
 
-
 Copyright (c) 2026, Swazeee
-
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-
 1. Redistributions of source code must retain the above copyright notice, this
    list of conditions and the following disclaimer.
-
 
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
-
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -170,12 +155,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </div>
     </div>
 
-
     <div class="max-w-7xl mx-auto w-full flex-grow">
         <header class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-center md:text-left">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-1 tracking-tighter uppercase italic drop-shadow-sm title-text">Pixel Art Generator</h1>
-                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.8</p>
+                <p class="text-slate-400 text-xs font-semibold tracking-wide">A fun tool for making pixel art. • v2.8.9</p>
             </div>
             <div class="flex items-center gap-2">
                 <button id="openLicenseBtn" class="text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase transition-colors mr-2">License</button>
@@ -184,7 +168,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 </span>
             </div>
         </header>
-
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Sidebar -->
@@ -201,7 +184,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             </div>
                         </div>
                     </div>
-
 
                     <!-- 2. Settings -->
                     <div class="space-y-4">
@@ -221,9 +203,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             <div>
                                 <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 mb-2">
                                     <span>Color Blending</span>
-                                    <span id="colorThresholdVal" class="text-emerald-400">Low</span>
+                                    <span id="colorThresholdVal" class="text-emerald-400">Perfect</span>
                                 </div>
-                                <input type="range" id="colorThreshold" min="0" max="80" step="1" value="15" class="accent-emerald-500">
+                                <input type="range" id="colorThreshold" min="0" max="80" step="1" value="0" class="accent-emerald-500">
                             </div>
                         </div>
                         <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-700/50 space-y-3">
@@ -241,7 +223,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             </div>
                         </div>
                     </div>
-
 
                     <!-- 3. Merge (New Feature) -->
                     <div class="space-y-3 pt-4 border-t border-slate-700/50">
@@ -265,7 +246,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             </div>
                         </div>
                     </div>
-
 
                     <!-- Outline Settings -->
                     <div class="space-y-3 pt-4 border-t border-slate-700/50">
@@ -295,7 +275,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     </div>
                 </div>
 
-
                 <div class="p-5 pt-4 border-t border-slate-700/50 bg-slate-900/40 shrink-0 space-y-4 z-10 relative backdrop-blur-md">
                     <div class="grid grid-cols-2 gap-2 text-center">
                         <div class="bg-slate-950/50 border border-slate-800 p-2.5 rounded-xl shadow-inner">
@@ -308,14 +287,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         </div>
                     </div>
 
-
                     <div class="input-group p-1 bg-slate-900/80">
                         <select id="limitSelector" class="bg-transparent cursor-pointer text-xs font-bold text-slate-300 focus:text-indigo-300">
                             <option value="3000">Standard Map (&lt; 3000 Blocks)</option>
                             <option value="2000">Community Upload (&lt; 2000)</option>
                         </select>
                     </div>
-
 
                     <div class="flex gap-2">
                         <button id="downloadBtn" disabled class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-4 rounded-xl transition-all disabled:opacity-50 shadow-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 group">
@@ -325,7 +302,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     </div>
                 </div>
             </div>
-
 
             <!-- Preview Area -->
             <div class="lg:col-span-3 space-y-4">
@@ -391,7 +367,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </div>
     </div>
 
-
     <script>
         // DOM Elements
         const imageInput = document.getElementById('imageInput');
@@ -442,23 +417,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         const openLicenseBtn = document.getElementById('openLicenseBtn');
         const closeLicense = document.getElementById('closeLicense');
 
-
         // License Modal Logic
         if(openLicenseBtn) openLicenseBtn.addEventListener('click', () => licenseModal.classList.remove('hidden'));
         if(closeLicense) closeLicense.addEventListener('click', () => licenseModal.classList.add('hidden'));
 
-
         let originalImage = null, croppedImage = null, currentFilter = 'none', updateTimer = null, isCropMode = false, isDragging = false, startX, startY, endX, endY, isOptimizing = false, currentZoom = 1.0;
         
         // Multi-level state
-        let workingLevelData = null; // The level being assembled
+        let workingLevelData = null; 
         let selectedMapIndex = 0;
-        let modifiedMapIndices = new Set(); // Track modified maps
+        let modifiedMapIndices = new Set();
         
         // Current generated art state (candidate for injection)
         let currentGeneratedObjects = [];
         let currentGeneratedSize = [0, 0];
-
 
         const showNotif = (msg, type='info') => {
             notifText.innerText = msg;
@@ -476,7 +448,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         };
         const triggerUpdate = () => { if (!originalImage) return; clearTimeout(updateTimer); loadingTag.classList.remove('hidden'); updateTimer = setTimeout(() => { updatePreview(); generateData(); loadingTag.classList.add('hidden'); }, 150); };
         
-        const loadFile = (file) => { const r = new FileReader(); r.onload = (e) => { const i = new Image(); i.onload = () => { originalImage = i; croppedImage = null; document.getElementById('placeholderText').classList.add('hidden'); previewCanvas.classList.remove('hidden'); cropToggleBtn.disabled = false; resetCropBtn.disabled = true; currentZoom = 1.0; updateZoomDisplay(); triggerUpdate(); }; i.src = e.target.result; }; r.readAsDataURL(file); };
+        const loadFile = (file) => { 
+            const r = new FileReader(); 
+            r.onload = (e) => { 
+                const i = new Image(); 
+                i.onload = () => { 
+                    originalImage = i; 
+                    croppedImage = null; 
+                    document.getElementById('placeholderText').classList.add('hidden'); 
+                    previewCanvas.classList.remove('hidden'); 
+                    cropToggleBtn.disabled = false; 
+                    resetCropBtn.disabled = true; 
+                    currentZoom = 1.0; 
+                    updateZoomDisplay(); 
+                    
+                    // NEW BEHAVIOR: Always reset configuration to max quality (10px, Perfect Blending)
+                    pixelSizeInput.value = 10;
+                    pixelSizeVal.innerText = '10px';
+                    colorThresholdInput.value = 0;
+                    colorThresholdVal.innerText = 'Perfect';
+                    
+                    triggerUpdate(); 
+                }; 
+                i.src = e.target.result; 
+            }; 
+            r.readAsDataURL(file); 
+        };
+        
         imageInput.addEventListener('change', (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); });
         window.addEventListener('paste', (e) => { if (e.clipboardData.files[0]) loadFile(e.clipboardData.files[0]); });
         
@@ -493,8 +491,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         zoomOutBtn.addEventListener('click', () => { if (currentZoom > 0.25) { currentZoom -= 0.25; updateZoomDisplay(); } });
         fullscreenBtn.addEventListener('click', () => { previewContainer.classList.toggle('fullscreen-active'); const isFs = previewContainer.classList.contains('fullscreen-active'); fsIcon.innerHTML = isFs ? '<path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/>' : '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'; document.body.style.overflow = isFs ? 'hidden' : ''; if (isCropMode) syncOverlay(); });
 
-
-        // === Import Logic ===
         importLevelInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -503,85 +499,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 try {
                     const json = JSON.parse(ev.target.result);
                     if (!json.maps || !Array.isArray(json.maps)) { alert("Invalid Skap Level format"); return; }
-                    
-                    workingLevelData = json; // Initialize working copy
-                    modifiedMapIndices = new Set(); // Reset modified list
-                    selectedMapIndex = 0;
-                    
+                    workingLevelData = json; selectedMapIndex = 0;
                     importLabel.innerHTML = `Loaded: <span class='text-white'>${file.name.slice(0, 15)}...</span>`;
                     importLabel.classList.add('bg-indigo-600', 'text-white'); importLabel.classList.remove('bg-slate-800', 'text-slate-400');
-                    areaSelectorContainer.classList.remove('hidden'); 
-                    downloadBtn.innerText = "Download Full Level";
-                    
-                    renderThumbnails(); 
+                    areaSelectorContainer.classList.remove('hidden'); renderThumbnails(); triggerUpdate();
                     showNotif("Level Imported Successfully!", "success");
                 } catch (err) { console.error(err); alert("Error parsing JSON file"); }
             };
             reader.readAsText(file);
         });
 
-
         function renderThumbnails() {
-            if (!workingLevelData) return;
             areaList.innerHTML = '';
             workingLevelData.maps.forEach((map, index) => {
                 const wrapper = document.createElement('div');
                 wrapper.className = `area-card ${index === selectedMapIndex ? 'selected' : ''} ${modifiedMapIndices.has(index) ? 'modified' : ''}`;
-                
-                wrapper.onclick = () => { 
-                    selectedMapIndex = index; 
-                    renderThumbnails(); // Re-render to update selected status
-                };
-                
+                wrapper.onclick = () => { selectedMapIndex = index; renderThumbnails(); };
                 const canvas = document.createElement('canvas');
-                canvas.className = "area-thumb"; 
-                const ctx = canvas.getContext('2d'); 
-                canvas.width = 100; canvas.height = 75;
+                canvas.className = "area-thumb"; const ctx = canvas.getContext('2d'); canvas.width = 100; canvas.height = 75;
                 ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 100, 75);
-                
                 if (map.objects && map.objects.length > 0) {
                     let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
                     map.objects.forEach(o => { if (o.type === 'block' && o.position && o.size) { minX = Math.min(minX, o.position[0]); maxX = Math.max(maxX, o.position[0] + o.size[0]); minY = Math.min(minY, o.position[1]); maxY = Math.max(maxY, o.position[1] + o.size[1]); } });
-                    if(minX !== Infinity) { 
-                        const mapW = maxX - minX || 100; const mapH = maxY - minY || 100; 
-                        const scale = Math.min(100/mapW, 75/mapH) * 0.9; 
-                        map.objects.forEach(o => { 
-                            if(o.type === 'block') { 
-                                const c = o.color || [100,100,100]; 
-                                ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; 
-                                ctx.fillRect((o.position[0]-minX)*scale + 5, (o.position[1]-minY)*scale + 5, o.size[0]*scale, o.size[1]*scale); 
-                            } 
-                        }); 
-                    }
+                    if(minX !== Infinity) { const mapW = maxX - minX || 100; const mapH = maxY - minY || 100; const scale = Math.min(100/mapW, 75/mapH) * 0.9; map.objects.forEach(o => { if(o.type === 'block') { const c = o.color || [100,100,100]; ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; ctx.fillRect((o.position[0]-minX)*scale + 5, (o.position[1]-minY)*scale + 5, o.size[0]*scale, o.size[1]*scale); } }); }
                 }
-                const label = document.createElement('div'); 
-                label.className = "text-[9px] text-center text-slate-300 py-1 truncate px-1"; 
-                label.innerText = map.name || `Area ${index+1}`; 
-                wrapper.appendChild(canvas); wrapper.appendChild(label); areaList.appendChild(wrapper);
+                const label = document.createElement('div'); label.className = "text-[9px] text-center text-slate-300 py-1 truncate px-1"; label.innerText = map.name || `Area ${index+1}`; wrapper.appendChild(canvas); wrapper.appendChild(label); areaList.appendChild(wrapper);
             });
         }
 
-
-        // === Inject Logic ===
         injectBtn.addEventListener('click', () => {
             if (!workingLevelData) { showNotif("No level imported!", "error"); return; }
             if (currentGeneratedObjects.length === 0) { showNotif("No pixel art generated!", "error"); return; }
-            
-            // Destructively replace objects in the selected map
             workingLevelData.maps[selectedMapIndex].objects = [...currentGeneratedObjects];
-            // Update Size strictly
             workingLevelData.maps[selectedMapIndex].size = [...currentGeneratedSize];
-            // Ensure Area Color
             if (!workingLevelData.maps[selectedMapIndex].areaColor) {
                 workingLevelData.maps[selectedMapIndex].areaColor = [230, 230, 230];
             }
-
-
             modifiedMapIndices.add(selectedMapIndex);
             renderThumbnails();
             showNotif(`Art injected into Area ${selectedMapIndex + 1}!`, "success");
         });
-
 
         function applyFilter(r, g, b) { if (currentFilter === 'none') return [r, g, b]; if (currentFilter === 'grayscale') { const v = 0.3 * r + 0.59 * g + 0.11 * b; return [v, v, v]; } if (currentFilter === 'invert') return [255-r, 255-g, 255-b]; if (currentFilter === 'gameboy') { const avg = (r+g+b)/3; if(avg < 64) return [15, 56, 15]; if(avg < 128) return [48, 98, 48]; if(avg < 192) return [139, 172, 15]; return [155, 188, 15]; } if (currentFilter === 'contrast') { const f = (259 * (128 + 255)) / (255 * (259 - 128)); return [(f*(r-128)+128), (f*(g-128)+128), (f*(b-128)+128)].map(v => Math.max(0, Math.min(255, v))); } if (currentFilter === 'sepia') return [(r*.393)+(g*.769)+(b*.189), (r*.349)+(g*.686)+(b*.168), (r*.272)+(g*.534)+(b*.131)]; return [r, g, b]; }
         function hexToRgb(hex) { const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return res ? [parseInt(res[1], 16), parseInt(res[2], 16), parseInt(res[3], 16)] : [0, 0, 0]; }
@@ -600,15 +557,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             const output = ctx.createImageData(canvasW, canvasH);
             for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const idx = (y * canvasW + x) * 4, rx = doOutline ? x-border : x, ry = doOutline ? y-border : y; const cell = (rx>=0 && ry>=0 && rx<sampleW && ry<sampleH) ? grid[ry][rx] : null; if (cell) { output.data[idx]=cell.r; output.data[idx+1]=cell.g; output.data[idx+2]=cell.b; output.data[idx+3]=255; } else if (doOutline) { let isB = false; for(let dy=-border;dy<=border;dy++) { for(let dx=-border;dx<=border;dx++) { const nx=rx+dx, ny=ry+dy; if(nx>=0 && ny>=0 && nx<sampleW && ny<sampleH && grid[ny][nx]) { isB=true; break; } } if(isB) break; } if (isB) { output.data[idx]=oRgb[0]; output.data[idx+1]=oRgb[1]; output.data[idx+2]=oRgb[2]; output.data[idx+3]=255; } } } }
             ctx.putImageData(output, 0, 0);
-            const sMode = spawnModeInput.value; let spX = canvasW/2, spY = canvasH/2; if (sMode === 'bottom') spY = canvasH - (doOutline ? border : 0) - 1.5;
-            ctx.beginPath(); ctx.arc(spX, spY, 2.5/gridSize, 0, Math.PI*2); ctx.fillStyle = '#4ade80'; ctx.fill();
             if(isCropMode) syncOverlay();
         }
 
-
         const bannedTerms = ["badword", "offensive"];
         const containsProfanity = (text) => text && bannedTerms.some(w => text.toLowerCase().includes(w));
-
 
         function generateData() {
             if (!originalImage) return; errorOverlay.classList.add('hidden');
@@ -616,7 +569,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             const sampleW = Math.ceil(img.width/gridSize), sampleH = Math.ceil(img.height/gridSize);
             const tCtx = document.createElement('canvas').getContext('2d'); tCtx.canvas.width = sampleW; tCtx.canvas.height = sampleH; tCtx.drawImage(img, 0, 0, sampleW, sampleH); const data = tCtx.getImageData(0, 0, sampleW, sampleH).data;
             
-            // Re-implement grid logic exactly matching updatePreview to ensure color accuracy
             const grid = Array(sampleH).fill(null).map(() => Array(sampleW).fill(null));
             const palette = [];
             
@@ -631,7 +583,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 } 
                 grid[y][x] = {r, g, b, used: false}; 
             }
-
 
             const canvasW = doOutline ? sampleW + border*2 : sampleW, canvasH = doOutline ? sampleH + border*2 : sampleH; const fullGrid = Array(canvasH).fill(0).map(() => Array(canvasW).fill(null));
             for(let y=0; y<canvasH; y++) { for(let x=0; x<canvasW; x++) { const rx=doOutline?x-border:x, ry=doOutline?y-border:y; const cell = (rx>=0 && ry>=0 && rx<sampleW && ry<sampleH) ? grid[ry][rx] : null; if(cell) fullGrid[y][x] = { ...cell, isOutline: false }; else if(doOutline) { let isB = false; for(let dy=-border;dy<=border;dy++) { for(let dx=-border;dx<=border;dx++){ const nx=rx+dx, ny=ry+dy; if(nx>=0 && ny>=0 && nx<sampleW && ny<sampleH && grid[ny][nx]) { isB=true; break; } } if(isB) break; } if(isB) fullGrid[y][x] = { r:oRgb[0], g:oRgb[1], b:oRgb[2], used: false, isOutline: true }; } } }
@@ -659,11 +610,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 downloadBtn.disabled=false; blockCountSpan.className="text-xl font-black text-indigo-400 leading-none"; 
             }
 
-
             // Update candidate objects and size
             currentGeneratedObjects = objs;
             currentGeneratedSize = [canvasW*gridSize, canvasH*gridSize];
-
 
             blockCountSpan.innerText = objs.length; worldDimTextSpan.innerText = `${canvasW*gridSize}x${canvasH*gridSize}`;
             
@@ -682,17 +631,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 }] 
             };
 
-
             const str = JSON.stringify(singleExportData, null, 2); jsonPreview.innerText = str.length>1000?str.slice(0,1000)+'...':str;
         }
 
-
         downloadBtn.addEventListener('click', () => { 
-            // Decide what to download: Full Merged Level OR Single Art
-            const dataToDownload = workingLevelData ? workingLevelData : JSON.parse(jsonPreview.innerText); // Reconstruct from preview or state
-            // If Single mode (no workingLevelData), we should regenerate strictly to be safe, but grabbing from generateData's implicit state is better.
-            // Actually, let's just use the currentGeneratedObjects if Single mode.
-            
             let finalOutput;
             if (workingLevelData) {
                 finalOutput = workingLevelData; // Download the accumulated level
@@ -713,7 +655,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 };
             }
 
-
             const b = new Blob([JSON.stringify(finalOutput)], {type:'application/json'}); 
             const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = (levelNameInput.value||'art')+'.json'; a.click(); 
         });
@@ -728,6 +669,3 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </script>
 </body>
 </html>
-
-
-
